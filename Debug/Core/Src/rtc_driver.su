@@ -1,0 +1,5 @@
+rtc_driver.c:38:14:rtcFormatTimeAndDate	64	static
+rtc_driver.c:175:6:rtcPrintInitMessage	24	static
+rtc_driver.c:190:6:configureRTCTime	112	static
+rtc_driver.c:328:6:configureRTCDate	104	static
+rtc_driver.c:416:6:rtcReportingCb	24	static

@@ -1,0 +1,7 @@
+led_driver.c:15:6:ledTask	24	static
+led_driver.c:30:6:stopTimers	16	static
+led_driver.c:39:6:ledTimerCb1	16	static
+led_driver.c:49:6:ledTimerCb2	16	static
+led_driver.c:58:6:ledTimerCb3	16	static
+led_driver.c:88:6:ledTimerCb4	16	static
+led_driver.c:118:6:ledSetAllLow	8	static

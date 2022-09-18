@@ -1,0 +1,14 @@
+main.c:171:6:HAL_UART_RxCpltCallback	24	static
+main.c:196:5:main	64	static
+main.c:320:6:SystemClock_Config	88	static
+main.c:362:13:MX_RTC_Init	8	static
+main.c:396:13:MX_USART2_UART_Init	8	static
+main.c:429:13:MX_GPIO_Init	40	static
+main.c:462:6:startAllTimers	16	static
+main.c:478:6:print_task	24	static
+main.c:500:6:menuTask	24	static
+main.c:526:5:setCommandTaskState	24	static
+main.c:548:6:commandTask	144	static
+main.c:647:6:recvMsgFromQueue	24	static
+main.c:665:6:rtcTask	32	static
+main.c:715:6:Error_Handler	4	static,ignoring_inline_asm
