@@ -160,6 +160,8 @@ const char* const menu_msg[7] = {"\n=========================\n",
                      "Date and time        ----> 1\n"      ,
                      "Exit                            ----> 2\n"      ,
                      "Enter your choice here: "     };
+
+const char* const invalid_opt_str = "Invalid Option";
 //make const chars
 // Maybe make it array of char * and have task iterate the length of array until
 // complete msg is sent
@@ -523,6 +525,19 @@ void menuTask(void *argument)
 */
 /* USER CODE END Header_ledTask */
 
+void commandTaskRecv(char *recv_buffer)
+{
+	int i = 0;
+	//TODO: (URGENT) Convert this to one function
+	do
+    {
+	   xQueueReceive(commandQueueHandle, &recv_buffer[i], portMAX_DELAY);
+	   ++i;
+    }while(uxQueueMessagesWaiting(commandQueueHandle) > 0);
+
+    recv_buffer[i - 1] = '\0';
+}
+
 int setCommandTaskState(state newState)
 {
   int err;
@@ -549,22 +564,12 @@ void commandTask(void *argument)
 {
   /* USER CODE BEGIN commandTask */
   /* Infinite loop */
-  int i, str_len, idx;
+  int str_len, idx;
   char recv_cmd[100];
 
   for(;;)
   {
-	//receiveCommands(commandQueueHandle, recv_cmd);
-	i = 0;
-	//TODO: (URGENT) Convert this to one function
-	do
-    {
-	   xQueueReceive(commandQueueHandle, &recv_cmd[i], portMAX_DELAY);
-	   ++i;
-    }while(uxQueueMessagesWaiting(commandQueueHandle) > 0);
-
-    recv_cmd[i - 1] = '\0';
-
+    commandTaskRecv(recv_cmd);
 	switch(current_state) {
 	   case MAIN_MENU :
 		   if(strcmp(recv_cmd, "0") == 0)
@@ -583,11 +588,8 @@ void commandTask(void *argument)
 		   }
 		   else
 		   {
-			 //TODO: Make this one single routine
-             char *test_str = "Invalid Option\n";
-	    	 int len = strlen(test_str);
-             HAL_UART_Transmit(&huart2, test_str, len, 1000);
-  		     xTaskNotifyGive(menu_taskHandle);
+             xQueueSendToBack(printQueueHandle, &invalid_opt_str, portMAX_DELAY);
+             xTaskNotifyGive(menu_taskHandle);
 		   }
 		   break;
 	   case LED_MENU:
@@ -622,22 +624,18 @@ void commandTask(void *argument)
 		   }
 		   else
 		   {
-		     char *test_str = "Invalid Option\n";
-		     int len = strlen(test_str);
-		     HAL_UART_Transmit(&huart2, test_str, len, 1000);
+		     xQueueSendToBack(printQueueHandle, &invalid_opt_str, portMAX_DELAY);
 		   }
 		   xTaskNotifyGive(menu_taskHandle);
 		   current_state = MAIN_MENU;
 		   break;
 	   case RTC_MENU:
-		   //Make this a function.
+		   //TODO: Make this a function.
 		   str_len = (int)strlen(recv_cmd);
 		   for (idx = 0; idx < str_len; ++idx)
 		   {
 		     xQueueSendToBack(rtcQueueHandle, &recv_cmd[idx], portMAX_DELAY);
 		   }
-		   //xTaskNotifyGive(menu_taskHandle);
-		   //current_state = MAIN_MENU;
 		   break;
 	}
   }
@@ -666,17 +664,12 @@ void rtcTask(void *argument)
 {
   /* USER CODE BEGIN rtcTask */
   /* Infinite loop */
-  int recv_val;
   char *recv_cmd = malloc(30);
-
-  // Todo: Continue deferring RTC processing work to this task, create subroutines to clean up as necessary.
   for(;;)
   {
 	  ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 	  rtcPrintInitMessage(&hrtc);
-
       recvMsgFromQueue(rtcQueueHandle, recv_cmd);
-      recv_val = atoi(recv_cmd);
 
 	   if (strcmp(recv_cmd, "0") == 0)
 	   {
@@ -699,9 +692,8 @@ void rtcTask(void *argument)
 	   }
 	   else
 	   {
-	     char *test_str = "Invalid Option\n";
-		 int len = strlen(test_str);
-		 HAL_UART_Transmit(&huart2, test_str, len, 1000);
+		 xQueueSendToBack(printQueueHandle, &invalid_opt_str, portMAX_DELAY);
+		 setCommandTaskState(MAIN_MENU);
 	   }
   }
   /* USER CODE END rtcTask */
